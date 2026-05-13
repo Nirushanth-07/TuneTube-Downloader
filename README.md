@@ -30,7 +30,7 @@ High-resolution downloads (4K/8K) require **FFmpeg** to merge video and audio st
 ### 2. Clone the Repository
 ```bash
 git clone [https://github.com/Nirushanth-07/TuneTube-Downloader.git](https://github.com/Nirushanth-07/TuneTube-Downloader.git)
-cd tune-tube
+cd Tune-Tube-Downloader
 ```
 
 ### 3. Create a Virtual Environment
