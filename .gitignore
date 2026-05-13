@@ -1,0 +1,7 @@
+# Python Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+*.mp4
+*.mkv
