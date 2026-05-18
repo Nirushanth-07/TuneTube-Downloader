@@ -54,6 +54,34 @@ def download_video(url, quality):
 
 
 
+def download_audio(url):
+
+    ydl_opts = {
+        'format': 'bestaudio/best', 
+
+        'postprocessors': [{
+        'key': 'FFmpegExtractAudio',
+        'preferredcodec': 'mp3',
+        'preferredquality': '320', 
+    }],
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            
+            print(f"Title: {info.get('title')}")
+            print(f"Uploader: {info.get('uploader')}")
+            print(f"Duration: {info.get('duration')} seconds")
+            
+            ydl.download([url])
+
+            print("\nSuccessfully downloaded and converted to MP3!")
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
+
+
+
 if __name__ == "__main__":
 
     BANNER = r"""
@@ -70,14 +98,19 @@ _________  ___  ___  ________   _______           _________  ___  ___  ________ 
     print(BANNER)
     print("\n")
 
-    url = input("Enter the YouTube video URL: ")
+    url = input("Enter the video URL: ")
 
-    resolution = get_video_information(url)
+    option = input("Do you want do download Video/Audio ('1' : Audio, '2': Video): ")
 
-    quality = input("Enter the resolution of the video (digits only, eg: 1080, 1440,..): ")
-
-    if quality.isdigit() and int(quality) >= 360:
-        download_video(url, quality)
+    if option == '2':
+        resolution = get_video_information(url)
+        quality = input("Enter the resolution of the video (digits only, eg: 1080, 1440,..): ")
+        if quality.isdigit() and int(quality) >= 360:
+            download_video(url, quality)
+        else:
+            print("Invalid resolution.")  
+    elif option == '1':
+        download_audio(url)
     else:
-        print("Invalid resolution.")
+        print("\nInvalid Option\n")
     

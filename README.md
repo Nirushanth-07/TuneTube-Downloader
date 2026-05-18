@@ -4,7 +4,7 @@
 [![yt-dlp](https://img.shields.io/badge/Engine-yt--dlp-red?style=for-the-badge)](https://github.com/yt-dlp/yt-dlp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-**TuneTube** is a high-performance command-line utility for downloading YouTube videos in maximum quality (up to 4K/8K). Built with Python, it leverages the power of `yt-dlp` to provide a seamless, "auto-quality" experience.
+**TuneTube** is a high-performance command-line utility for downloading videos in maximum quality (up to 4K/8K) and audios. Built with Python, it leverages the power of `yt-dlp` to provide a seamless, "auto-quality" experience.
 
 ---
 
