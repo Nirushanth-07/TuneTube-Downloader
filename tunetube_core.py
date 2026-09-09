@@ -267,6 +267,7 @@ def _base_opts(outdir, log, progress, is_cancelled, state):
 def download_video(url, quality='best', outdir=None, log=None,
                    progress=None, is_cancelled=None):
     """Download the video stream at (at most) ``quality`` and merge to MKV."""
+    _require_ytdlp()   # before makedirs, so a missing dep leaves no stray dir
     log = log or _noop_log
     outdir = outdir or default_download_dir()
     state = {}
@@ -282,6 +283,7 @@ def download_video(url, quality='best', outdir=None, log=None,
 def download_audio(url, outdir=None, log=None, progress=None,
                    is_cancelled=None, bitrate='320'):
     """Download the best audio stream and transcode it to MP3."""
+    _require_ytdlp()   # before makedirs, so a missing dep leaves no stray dir
     log = log or _noop_log
     outdir = outdir or default_download_dir()
     state = {}

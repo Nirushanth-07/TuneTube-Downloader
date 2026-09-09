@@ -67,8 +67,12 @@ class TuneTubeGUI:
     def __init__(self, root):
         self.root = root
         self.mono = pick_font()
+        # Point sizes, so text tracks the user's display scaling; the window
+        # is then sized from the finished layout in _fit_window(), which is
+        # what keeps a scaled UI from outgrowing its geometry.
         self.font = (self.mono, 10)
         self.font_small = (self.mono, 9)
+        self.font_banner = (self.mono, 9)
 
         self.events = queue.Queue()
         self.cancel = threading.Event()
@@ -84,6 +88,7 @@ class TuneTubeGUI:
         self._build_status()
         self._bind_keys()
 
+        self._fit_window()
         self.root.after(60, self._pump)
         self._blink()
         self._greet()
@@ -95,15 +100,28 @@ class TuneTubeGUI:
     def _build_window(self):
         self.root.title('TuneTube Downloader')
         self.root.configure(bg=BG)
-        self.root.minsize(760, 560)
-        width, height = 940, 720
-        x = max(0, (self.root.winfo_screenwidth() - width) // 2)
-        y = max(0, (self.root.winfo_screenheight() - height) // 3)
-        self.root.geometry(f'{width}x{height}+{x}+{y}')
         self.root.protocol('WM_DELETE_WINDOW', self._on_close)
 
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(3, weight=1)   # console expands
+
+    def _fit_window(self):
+        '''Size to what the widgets actually asked for, then centre.
+
+        A hardcoded geometry clipped the buttons on scaled displays, so let
+        the built layout state its own width and honour it.
+        '''
+        self.root.update_idletasks()
+        need_w = self.root.winfo_reqwidth()
+        need_h = self.root.winfo_reqheight()
+        screen_w = self.root.winfo_screenwidth()
+        screen_h = self.root.winfo_screenheight()
+        width = min(max(need_w, 900), screen_w - 60)
+        height = min(max(need_h, 660), screen_h - 120)
+        x = max(0, (screen_w - width) // 2)
+        y = max(0, (screen_h - height) // 3)
+        self.root.geometry(f'{width}x{height}+{x}+{y}')
+        self.root.minsize(min(need_w, width), 520)
 
     def _rule(self, parent, row, pady=(0, 0)):
         line = tk.Frame(parent, bg=DIM, height=1)
@@ -115,10 +133,10 @@ class TuneTubeGUI:
         head.grid(row=0, column=0, sticky='ew', padx=14, pady=(10, 4))
         head.columnconfigure(0, weight=1)
 
-        tk.Label(head, text=BANNER.strip('\n'), font=(self.mono, 9), bg=BG,
+        tk.Label(head, text=BANNER.strip('\n'), font=self.font_banner, bg=BG,
                  fg=FG, justify='left', anchor='w').grid(row=0, column=0,
                                                         sticky='w')
-        tk.Label(head, text=TAGLINE, font=(self.mono, 9), bg=BG, fg=DIM,
+        tk.Label(head, text=TAGLINE, font=self.font_small, bg=BG, fg=DIM,
                  anchor='w').grid(row=1, column=0, sticky='w', pady=(4, 0))
         self._rule(self.root, 1, pady=(6, 0))
 
@@ -175,11 +193,14 @@ class TuneTubeGUI:
             button.grid(row=0, column=index, padx=(0, 8))
             self.mode_buttons[value] = (button, caption)
 
-        tk.Label(row, text='quality', font=self.font, bg=BG,
-                 fg=DIM).grid(row=0, column=2, padx=(10, 6))
+        # --- quality ----------------------------------------------------
+        self._label(form, 'qual $').grid(row=2, column=0, sticky='e',
+                                         padx=(0, 8), pady=3)
+        qrow = tk.Frame(form, bg=BG)
+        qrow.grid(row=2, column=1, sticky='ew', pady=3)
 
         self.quality_var = tk.StringVar(value='best')
-        self.quality_menu = tk.OptionMenu(row, self.quality_var, 'best')
+        self.quality_menu = tk.OptionMenu(qrow, self.quality_var, 'best')
         self.quality_menu.config(font=self.font, bg=PANEL, fg=FG,
                                  activebackground=FG, activeforeground=BG,
                                  relief='flat', bd=0, highlightthickness=1,
@@ -189,17 +210,20 @@ class TuneTubeGUI:
                                          activebackground=FG,
                                          activeforeground=BG, bd=0,
                                          relief='flat')
-        self.quality_menu.grid(row=0, column=3)
+        self.quality_menu.grid(row=0, column=0)
 
-        self.fetch_button = self._button(row, '[ fetch info ]',
+        self.fetch_button = self._button(qrow, '[ fetch info ]',
                                          self.on_fetch, fg=CYAN)
-        self.fetch_button.grid(row=0, column=4, padx=(8, 0))
+        self.fetch_button.grid(row=0, column=1, padx=(8, 0))
+        tk.Label(qrow, text='lists every resolution this url offers',
+                 font=self.font_small, bg=BG,
+                 fg=DIM).grid(row=0, column=2, padx=(12, 0))
 
         # --- output directory ------------------------------------------
-        self._label(form, 'out  $').grid(row=2, column=0, sticky='e',
+        self._label(form, 'out  $').grid(row=3, column=0, sticky='e',
                                          padx=(0, 8), pady=3)
         out = tk.Frame(form, bg=BG)
-        out.grid(row=2, column=1, sticky='ew', pady=3)
+        out.grid(row=3, column=1, sticky='ew', pady=3)
         out.columnconfigure(0, weight=1)
 
         self.outdir_var = tk.StringVar(value=core.default_download_dir())
@@ -213,7 +237,7 @@ class TuneTubeGUI:
 
         # --- actions ----------------------------------------------------
         actions = tk.Frame(form, bg=BG)
-        actions.grid(row=3, column=1, sticky='ew', pady=(10, 0))
+        actions.grid(row=4, column=1, sticky='ew', pady=(12, 0))
 
         self.download_button = self._button(actions, '[ ▸ download ]',
                                             self.on_download)
@@ -241,7 +265,7 @@ class TuneTubeGUI:
             wrap, bg=BG, fg=FG, insertbackground=FG, relief='flat', bd=0,
             highlightthickness=0, wrap='word', font=self.font, padx=10,
             pady=8, spacing1=1, state='disabled', selectbackground=SELECT,
-            selectforeground=BRIGHT)
+            selectforeground=BRIGHT, height=14, width=1)
         self.console.grid(row=0, column=0, sticky='nsew')
 
         bar = tk.Scrollbar(wrap, command=self.console.yview, width=11,
@@ -334,7 +358,7 @@ class TuneTubeGUI:
         self.quality_menu.config(state='normal' if video else 'disabled')
 
     def _empty_bar(self):
-        return f'[{BAR_EMPTY * BAR_WIDTH}]   idle'
+        return f'[{BAR_EMPTY * BAR_WIDTH}]'
 
     def _blink(self):
         colour = self.cursor_label.cget('fg')

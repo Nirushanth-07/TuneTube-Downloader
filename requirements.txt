@@ -1,0 +1,9 @@
+# TuneTube Downloader - Python dependencies
+#   pip install -r requirements.txt
+#
+# Tkinter (the GUI toolkit) ships with Python itself on Windows and macOS.
+# On Debian/Ubuntu it is a separate package: sudo apt install python3-tk
+#
+# FFmpeg is a separate, non-Python program and must be on your PATH for
+# 4K/8K merging and MP3 conversion. See the README for install commands.
+yt-dlp>=2024.1.1

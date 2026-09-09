@@ -3,5 +3,17 @@
 venv/
 ENV/
 env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Downloaded media
 *.mp4
 *.mkv
+*.webm
+*.mp3
+*.m4a
+*.opus
+*.part
+*.ytdl
